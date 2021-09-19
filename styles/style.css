@@ -4,7 +4,7 @@
 }
 
 nav {
-  background-color: blue;
+  background-color: #3f51b5;
   color: white;
   text-align: center;
   margin-bottom: 5px;
@@ -57,4 +57,20 @@ main {
 .fiveDayForecast {
   border: 2px solid blue;
   margin-top: 5px;
+  padding-left: 20px;
+}
+.fiveDayCardsContainer {
+  display: flex;
+}
+
+.card {
+  background-color: #3f51b5;
+  color: white;
+  font-weight: bold;
+  margin-right: 20px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding: 5px;
+  border: 2px solid green;
+  width: 7%;
 }
