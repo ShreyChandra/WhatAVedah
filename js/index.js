@@ -15,8 +15,8 @@ let cityCoordinatesApi = "";
 let weatherApi = "";
 
 function setIcons(icon, iconIDsky) {
-  if (icon == "SNOW") var skycons = new Skycons({ color: "black" });
-  else var skycons = new Skycons({ color: "black" });
+  if (icon == "SNOW") var skycons = new Skycons({ color: "white" });
+  else var skycons = new Skycons({ color: "white" });
   skycons.play();
   return skycons.set(iconIDsky, Skycons[icon]);
 }
@@ -27,6 +27,21 @@ function covertToHumanDate(unixTimestamp) {
   const humanDateFormat = dateObject.toLocaleString(); //2019-12-9 10:30:15
   const humanDate = humanDateFormat.split(",")[0];
   return humanDate;
+}
+
+function convertIcons(weatherDesc) {
+  switch (weatherDesc) {
+    case "Clouds":
+      return "CLOUDY";
+    case "Rain":
+      return "RAIN";
+    case "Thunderstorm":
+      return "WIND";
+    case "Mist":
+      return "FOG";
+    case "Clear":
+      return "CLEAR_DAY";
+  }
 }
 
 searchButton.addEventListener("click", () => {
@@ -55,14 +70,14 @@ searchButton.addEventListener("click", () => {
           let humanDate = covertToHumanDate(unixTimestamp);
           // console.log(humanDateFormat, "XXXX", humanDate);
 
-          currentCityAndDateTitle.innerText = `${currentCity}, ${countryName} (${humanDate})`;
+          currentCityAndDateTitle.innerText = `${currentCity}, ${countryName} ${humanDate}`;
           currentCityTemp.innerText = `Temp: ${data.current.temp} °C`;
           currentCityWind.innerText = `Wind: ${Math.round(
             data.current.wind_speed * 3.6
           )} km/h`;
           currentCityHumidity.innerText = `Humidity: ${data.current.humidity} %`;
           currentCityUv.innerText = `UV Index: ${data.current.uvi}`;
-          var icon = "CLEAR_DAY";
+          var icon = convertIcons(data.current.weather[0].main);
           setIcons(icon, document.querySelector(".icon"));
 
           for (var i = 1; i <= 5; i++) {
@@ -72,6 +87,14 @@ searchButton.addEventListener("click", () => {
             let card = `.card` + i;
             let cardElement = document.querySelector(`${card}`);
             cardElement.appendChild(cardDateElement);
+
+            let cardIcon = convertIcons(data.daily[i].weather[0].main);
+            const cardIconElement = document.createElement("canvas");
+            cardIconElement.width = "30";
+            cardIconElement.height = "30";
+            cardIconElement.className = "cardIcon" + i;
+            cardElement.appendChild(cardIconElement);
+            setIcons(cardIcon, document.querySelector(`.cardIcon${i}`));
 
             let cardTemp = data.daily[i].temp.day;
             const cardTempElement = document.createElement("p");
@@ -87,7 +110,6 @@ searchButton.addEventListener("click", () => {
             const cardHumidityElement = document.createElement("p");
             cardHumidityElement.innerHTML = `Humidity: ${cardHumidity}`;
             cardElement.appendChild(cardHumidityElement);
-
             console.log(`-------[${i}]---------`);
             console.log(cardDate, cardTemp, cardWind, cardHumidity);
           }
