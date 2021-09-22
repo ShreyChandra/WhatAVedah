@@ -23,7 +23,10 @@
       </div>
       <div class="rightSideBar">
         <div class="currentCity">
-          <h2 id="cityCurrentAndDate">City title (Date) icon</h2>
+          <div class="headingWithIcon">
+            <h2 id="cityCurrentAndDate">City title (Date) icon</h2>
+            <canvas class="icon" width="40" height="40"></canvas>
+          </div>
           <p class="attributes temp">Temp:</p>
           <p class="attributes wind">Wind:</p>
           <p class="attributes humidity">Humidity:</p>
@@ -32,45 +35,16 @@
         <div class="fiveDayForecast">
           <h2>Five Day Forecast</h2>
           <div class="fiveDayCardsContainer">
-            <div class="card card1">
-              <p>Date</p>
-              <p>icon</p>
-              <p>temp</p>
-              <p>wind</p>
-              <p>humidity</p>
-            </div>
-            <div class="card card2">
-              <p>Date</p>
-              <p>icon</p>
-              <p>temp</p>
-              <p>wind</p>
-              <p>humidity</p>
-            </div>
-            <div class="card card3">
-              <p>Date</p>
-              <p>icon</p>
-              <p>temp</p>
-              <p>wind</p>
-              <p>humidity</p>
-            </div>
-            <div class="card card4">
-              <p>Date</p>
-              <p>icon</p>
-              <p>temp</p>
-              <p>wind</p>
-              <p>humidity</p>
-            </div>
-            <div class="card card5">
-              <p>Date</p>
-              <p>icon</p>
-              <p>temp</p>
-              <p>wind</p>
-              <p>humidity</p>
-            </div>
+            <div class="card card1"></div>
+            <div class="card card2"></div>
+            <div class="card card3"></div>
+            <div class="card card4"></div>
+            <div class="card card5"></div>
           </div>
         </div>
       </div>
     </main>
   </body>
   <script src="../js/index.js"></script>
+  <script src="../js/skycons.js"></script>
 </html>
