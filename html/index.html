@@ -22,15 +22,18 @@
         <ul id="cityList"></ul>
       </div>
       <div class="rightSideBar">
-        <div class="currentCity">
-          <div class="headingWithIcon">
-            <h2 id="cityCurrentAndDate">Choose a city to view forecast !</h2>
-            <canvas class="icon" width="40" height="40"></canvas>
+        <div class="parentCurrentCity">
+          <div class="currentCity">
+            <div class="headingWithIcon">
+              <h2 id="cityCurrentAndDate">Choose a city to view forecast !</h2>
+              <canvas class="icon" width="40" height="40"></canvas>
+            </div>
+            <p class="attributes temp">Temp:</p>
+            <p class="attributes wind">Wind:</p>
+            <p class="attributes humidity">Humidity:</p>
+            <p class="attributes">UV index: <span class="uv"></span></p>
           </div>
-          <p class="attributes temp">Temp:</p>
-          <p class="attributes wind">Wind:</p>
-          <p class="attributes humidity">Humidity:</p>
-          <p class="attributes">UV index: <span class="uv"></span></p>
+          <div hidden id="spinner"></div>
         </div>
         <div class="fiveDayForecast">
           <h2>Five Day Forecast</h2>

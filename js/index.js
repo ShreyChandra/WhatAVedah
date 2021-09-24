@@ -22,6 +22,20 @@ let cardHumidityElement = "";
 let allCityNamesSplit = [];
 let allButtons = document.getElementById("cityList");
 
+window.onload = function () {
+  let previousCityNames = localStorage.getItem("cityName");
+  if (previousCityNames.length) {
+    previousCityNames = previousCityNames.split(",");
+    for (let i = 0; i < previousCityNames.length; i++) {
+      console.log(previousCityNames[i]);
+      let cityButton = document.createElement("button");
+      cityButton.className = "cityButtons buttons";
+      cityButton.innerText = previousCityNames[i];
+      allButtons.appendChild(cityButton);
+    }
+  }
+};
+
 const setIcons = (icon, iconIDsky) => {
   let skycons = new Skycons({ color: "white" });
   skycons.play();
@@ -51,8 +65,11 @@ const convertIcons = (weatherDesc) => {
   }
 };
 
+const spinner = document.getElementById("spinner");
+
 searchButton.addEventListener("click", async () => {
   allButtons.innerHTML = "";
+  spinner.removeAttribute("hidden");
 
   currentCity = document.querySelector(".cityNameInput").value;
   cityCoordinatesApi = `http://api.openweathermap.org/geo/1.0/direct?q=${currentCity}&limit=1&appid=${apiKey}`;
@@ -63,11 +80,13 @@ searchButton.addEventListener("click", async () => {
 
   const responseWeather = await fetch(cityData);
   const weatherData = await responseWeather.json();
+
   showWeather(weatherData);
 });
 
 const weatherApiCall = (data) => {
   // console.log(data);
+  spinner.setAttribute("hidden", "");
   currentCityLat = data[0].lat;
   currentCityLong = data[0].lon;
   countryName = data[0].country;
@@ -80,7 +99,12 @@ const weatherApiCall = (data) => {
     allCityNamesSplit = previousCityNames.split(",");
   }
   if (!allCityNamesSplit.includes(currentCity)) {
-    allCityNamesSplit.push(currentCity);
+    if (allCityNamesSplit.length > 5) {
+      allCityNamesSplit.shift();
+      allCityNamesSplit.push(currentCity);
+    } else {
+      allCityNamesSplit.push(currentCity);
+    }
   }
 
   if (previousCityNames.length === 0) {
