@@ -6,6 +6,7 @@ let currentCityTemp = document.querySelector(".temp");
 let currentCityWind = document.querySelector(".wind");
 let currentCityHumidity = document.querySelector(".humidity");
 let currentCityUv = document.querySelector(".uv");
+let cityList = document.querySelector(".cityList");
 
 let cardElement1 = document.querySelector(".card1");
 
@@ -13,6 +14,12 @@ const apiKey = "47f166773e351368285402b79068ea73";
 
 let cityCoordinatesApi = "";
 let weatherApi = "";
+let cardDateElement = "";
+let cardIconElement = "";
+let cardTempElement = "";
+let cardWindElement = "";
+let cardHumidityElement = "";
+let allCityNamesSplit = [];
 
 function setIcons(icon, iconIDsky) {
   if (icon == "SNOW") var skycons = new Skycons({ color: "white" });
@@ -45,26 +52,57 @@ function convertIcons(weatherDesc) {
 }
 
 searchButton.addEventListener("click", () => {
-  console.log(document.querySelector(".cityNameInput").value);
+  let allButtons = document.getElementById("cityList");
+  allButtons.innerHTML = "";
+
   currentCity = document.querySelector(".cityNameInput").value;
   cityCoordinatesApi = `http://api.openweathermap.org/geo/1.0/direct?q=${currentCity}&limit=1&appid=${apiKey}`;
   // getting the geo coordinates based on the city name
   fetch(cityCoordinatesApi)
     .then((response) => response.json())
     .then((data) => {
-      console.log(data);
+      // console.log(data);
       currentCityLat = data[0].lat;
       currentCityLong = data[0].lon;
       countryName = data[0].country;
       currentCity = data[0].name;
-      console.log("------_XXXX-------");
-      console.log(currentCityLat, currentCityLong, countryName, currentCity);
+
+      let previousCityNames = localStorage.getItem("cityName") || "";
+      if (previousCityNames.length === 0) {
+        allCityNamesSplit = [currentCity];
+      } else {
+        allCityNamesSplit = previousCityNames.split(",");
+      }
+      if (!allCityNamesSplit.includes(currentCity)) {
+        allCityNamesSplit.push(currentCity);
+      }
+
+      if (previousCityNames.length === 0) {
+        let cityButton = document.createElement("button");
+        cityButton.className = "cityButtons buttons";
+        cityButton.innerText = currentCity;
+        allButtons.appendChild(cityButton);
+      } else {
+        console.log("-----CITY-----");
+        console.log(allCityNamesSplit);
+
+        for (let i = 0; i < allCityNamesSplit.length; i++) {
+          console.log(allCityNamesSplit[i]);
+          let cityButton = document.createElement("button");
+          cityButton.className = "cityButtons buttons";
+          cityButton.innerText = allCityNamesSplit[i];
+          allButtons.appendChild(cityButton);
+        }
+      }
+      localStorage.setItem("cityName", allCityNamesSplit.join());
+      // console.log("------_XXXX-------");
+      // console.log(currentCityLat, currentCityLong, countryName, currentCity);
 
       weatherApi = `https://api.openweathermap.org/data/2.5/onecall?lat=${currentCityLat}&lon=${currentCityLong}&units=metric&exclude=minutely,hourly&appid=${apiKey}`;
       fetch(weatherApi)
         .then((response) => response.json())
         .then((data) => {
-          console.log(data);
+          // console.log(data);
           //get human readable Datetime
           let unixTimestamp = data.current.dt;
           let humanDate = covertToHumanDate(unixTimestamp);
@@ -76,20 +114,33 @@ searchButton.addEventListener("click", () => {
             data.current.wind_speed * 3.6
           )} km/h`;
           currentCityHumidity.innerText = `Humidity: ${data.current.humidity} %`;
-          currentCityUv.innerText = `UV Index: ${data.current.uvi}`;
+
+          if (data.current.uvi <= 3) {
+            currentCityUv.style.backgroundColor = "green";
+          } else if (data.current.uvi > 3 && data.current.uvi < 7) {
+            currentCityUv.style.backgroundColor = "#E6D70E";
+          } else {
+            currentCityUv.style.backgroundColor = "red";
+          }
+          currentCityUv.innerText = `${data.current.uvi}`;
           var icon = convertIcons(data.current.weather[0].main);
           setIcons(icon, document.querySelector(".icon"));
 
+          let cards = document.getElementsByClassName("card");
+          for (let j = 0; j <= 4; j++) {
+            cards[j].innerHTML = "";
+          }
+
           for (var i = 1; i <= 5; i++) {
             let cardDate = covertToHumanDate(data.daily[i].dt);
-            const cardDateElement = document.createElement("p");
+            cardDateElement = document.createElement("p");
             cardDateElement.innerHTML = cardDate;
             let card = `.card` + i;
             let cardElement = document.querySelector(`${card}`);
             cardElement.appendChild(cardDateElement);
 
             let cardIcon = convertIcons(data.daily[i].weather[0].main);
-            const cardIconElement = document.createElement("canvas");
+            cardIconElement = document.createElement("canvas");
             cardIconElement.width = "30";
             cardIconElement.height = "30";
             cardIconElement.className = "cardIcon" + i;
@@ -97,21 +148,21 @@ searchButton.addEventListener("click", () => {
             setIcons(cardIcon, document.querySelector(`.cardIcon${i}`));
 
             let cardTemp = data.daily[i].temp.day;
-            const cardTempElement = document.createElement("p");
+            cardTempElement = document.createElement("p");
             cardTempElement.innerHTML = `Temp: ${cardTemp}`;
             cardElement.appendChild(cardTempElement);
 
             let cardWind = Math.round(data.daily[i].wind_speed * 3.6);
-            const cardWindElement = document.createElement("p");
+            cardWindElement = document.createElement("p");
             cardWindElement.innerHTML = `Wind: ${cardWind} km/h`;
             cardElement.appendChild(cardWindElement);
 
             let cardHumidity = data.daily[i].humidity;
-            const cardHumidityElement = document.createElement("p");
+            cardHumidityElement = document.createElement("p");
             cardHumidityElement.innerHTML = `Humidity: ${cardHumidity}`;
             cardElement.appendChild(cardHumidityElement);
-            console.log(`-------[${i}]---------`);
-            console.log(cardDate, cardTemp, cardWind, cardHumidity);
+            // console.log(`-------[${i}]---------`);
+            // console.log(cardDate, cardTemp, cardWind, cardHumidity);
           }
         });
     });
