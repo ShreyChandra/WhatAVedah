@@ -1,13 +1,10 @@
-var searchButton = document.querySelector("#searchButtonId");
+let searchButton = document.querySelector("#searchButtonId");
 let currentCity, currentCityLat, currentCityLong, countryName;
-
 let currentCityAndDateTitle = document.querySelector("#cityCurrentAndDate");
 let currentCityTemp = document.querySelector(".temp");
 let currentCityWind = document.querySelector(".wind");
 let currentCityHumidity = document.querySelector(".humidity");
 let currentCityUv = document.querySelector(".uv");
-let cityList = document.querySelector(".cityList");
-
 let cardElement1 = document.querySelector(".card1");
 
 const apiKey = "47f166773e351368285402b79068ea73";
@@ -22,19 +19,61 @@ let cardHumidityElement = "";
 let allCityNamesSplit = [];
 let allButtons = document.getElementById("cityList");
 
-window.onload = function () {
-  let previousCityNames = localStorage.getItem("cityName");
+window.onload = () => {
+  let previousCityNames = localStorage.getItem("cityName") || "";
   if (previousCityNames.length) {
     previousCityNames = previousCityNames.split(",");
     for (let i = 0; i < previousCityNames.length; i++) {
-      console.log(previousCityNames[i]);
       let cityButton = document.createElement("button");
       cityButton.className = "cityButtons buttons";
       cityButton.innerText = previousCityNames[i];
+      cityButton.setAttribute("value", previousCityNames[i]);
       allButtons.appendChild(cityButton);
     }
   }
 };
+
+const spinner = document.getElementById("spinner");
+
+const cityCall = async (city) => {
+  allButtons.innerHTML = "";
+  // allButtons.style.visibility = "hidden";
+  spinner.removeAttribute("hidden");
+  try {
+    cityCoordinatesApi = `http://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=1&appid=${apiKey}`;
+    // getting the geo coordinates based on the city name
+    const response = await fetch(cityCoordinatesApi);
+    const data = await response.json();
+    const cityData = weatherApiCall(data);
+    return cityData;
+  } catch (err) {
+    alert("Oops! are you sure that's a city ?");
+    window.location.reload();
+  }
+};
+
+const weatherUpdate = async (LatLongData) => {
+  const responseWeather = await fetch(LatLongData);
+  const weatherData = await responseWeather.json();
+  return weatherData;
+};
+
+const controllerFunc = async (evt) => {
+  let city = "";
+  if (evt.target.value != "") {
+    city = evt.target.value;
+  } else {
+    city = document.querySelector(".cityNameInput").value;
+  }
+  const LatLongData = await cityCall(city);
+  const weatherUpdates = await weatherUpdate(LatLongData);
+
+  showWeather(weatherUpdates);
+};
+
+searchButton.addEventListener("click", controllerFunc);
+
+allButtons.addEventListener("click", controllerFunc);
 
 const setIcons = (icon, iconIDsky) => {
   let skycons = new Skycons({ color: "white" });
@@ -65,28 +104,16 @@ const convertIcons = (weatherDesc) => {
   }
 };
 
-const spinner = document.getElementById("spinner");
-
-searchButton.addEventListener("click", async () => {
-  allButtons.innerHTML = "";
-  spinner.removeAttribute("hidden");
-
-  currentCity = document.querySelector(".cityNameInput").value;
-  cityCoordinatesApi = `http://api.openweathermap.org/geo/1.0/direct?q=${currentCity}&limit=1&appid=${apiKey}`;
-  // getting the geo coordinates based on the city name
-  const response = await fetch(cityCoordinatesApi);
-  const data = await response.json();
-  const cityData = weatherApiCall(data);
-
-  const responseWeather = await fetch(cityData);
-  const weatherData = await responseWeather.json();
-
-  showWeather(weatherData);
-});
+const createSearchButton = (currentCityName) => {
+  let cityButton = document.createElement("button");
+  cityButton.className = "cityButtons buttons";
+  cityButton.innerText = currentCityName;
+  cityButton.setAttribute("value", currentCityName);
+  allButtons.appendChild(cityButton);
+};
 
 const weatherApiCall = (data) => {
-  // console.log(data);
-  spinner.setAttribute("hidden", "");
+  document.querySelector(".cityNameInput").value = "";
   currentCityLat = data[0].lat;
   currentCityLong = data[0].lon;
   countryName = data[0].country;
@@ -108,22 +135,13 @@ const weatherApiCall = (data) => {
   }
 
   if (previousCityNames.length === 0) {
-    let cityButton = document.createElement("button");
-    cityButton.className = "cityButtons buttons";
-    cityButton.innerText = currentCity;
-    allButtons.appendChild(cityButton);
+    createSearchButton(currentCity);
   } else {
-    console.log("-----CITY-----");
-    console.log(allCityNamesSplit);
-
     for (let i = 0; i < allCityNamesSplit.length; i++) {
-      console.log(allCityNamesSplit[i]);
-      let cityButton = document.createElement("button");
-      cityButton.className = "cityButtons buttons";
-      cityButton.innerText = allCityNamesSplit[i];
-      allButtons.appendChild(cityButton);
+      createSearchButton(allCityNamesSplit[i]);
     }
   }
+
   localStorage.setItem("cityName", allCityNamesSplit.join());
 
   weatherApi = `https://api.openweathermap.org/data/2.5/onecall?lat=${currentCityLat}&lon=${currentCityLong}&units=metric&exclude=minutely,hourly&appid=${apiKey}`;
@@ -132,6 +150,7 @@ const weatherApiCall = (data) => {
 };
 
 const showWeather = (data) => {
+  spinner.setAttribute("hidden", "");
   let unixTimestamp = data.current.dt;
   let humanDate = covertToHumanDate(unixTimestamp);
 
